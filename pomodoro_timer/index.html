@@ -252,6 +252,30 @@
 
   /* 휴식 모드 색상 전환 */
   body.break-mode { --accent: var(--break); }
+
+  /* 모드 선택 토글 */
+  .mode-switch {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .mode-switch button {
+    flex: none;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--surface-2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .mode-switch button.active {
+    color: #0f1117;
+    background: var(--accent);
+    border-color: transparent;
+  }
 </style>
 </head>
 <body>
@@ -278,6 +302,10 @@
     </div>
     <h1>Pomodoro</h1>
     <div class="mode" id="modeLabel">집중 시간</div>
+    <div class="mode-switch">
+      <button id="focusModeBtn" class="active">25분 집중시간</button>
+      <button id="breakModeBtn">5분 휴식시간</button>
+    </div>
     <div class="time" id="timeDisplay">25:00</div>
     <div class="progress-track">
       <div class="progress-fill" id="progressFill"></div>
@@ -317,6 +345,8 @@
   const startPauseBtn = document.getElementById("startPauseBtn");
   const resetBtn = document.getElementById("resetBtn");
   const modeLabel = document.getElementById("modeLabel");
+  const focusModeBtn = document.getElementById("focusModeBtn");
+  const breakModeBtn = document.getElementById("breakModeBtn");
   const sessionCount = document.getElementById("sessionCount");
   const todayCount = document.getElementById("todayCount");
   const dailyChart = document.getElementById("dailyChart");
@@ -368,20 +398,37 @@
     } catch (e) { /* 오디오 미지원 환경 무시 */ }
   }
 
+  // 현재 모드에 맞춰 라벨 / 색상 / 토글 버튼 상태를 반영
+  function applyModeUI() {
+    const isFocus = mode === "focus";
+    modeLabel.textContent = isFocus ? "집중 시간" : "휴식 시간";
+    document.body.classList.toggle("break-mode", !isFocus);
+    focusModeBtn.classList.toggle("active", isFocus);
+    breakModeBtn.classList.toggle("active", !isFocus);
+  }
+
   function switchMode() {
     if (mode === "focus") {
       completedSessions++;
       sessionCount.textContent = `완료한 뽀모도로: ${completedSessions}`;
       saveSession("focus", FOCUS_SECONDS);  // DB에 기록
       mode = "break";
-      modeLabel.textContent = "휴식 시간";
-      document.body.classList.add("break-mode");
     } else {
       mode = "focus";
-      modeLabel.textContent = "집중 시간";
-      document.body.classList.remove("break-mode");
     }
+    applyModeUI();
     remaining = totalSeconds();
+  }
+
+  // 사용자가 모드 토글을 눌렀을 때 → 해당 모드로 전환 (기록 없이 초기화)
+  function setMode(newMode) {
+    if (mode === newMode && !running) return;
+    pause();                // 진행 중이던 타이머 정지 (기록하지 않음)
+    mode = newMode;
+    applyModeUI();
+    remaining = totalSeconds();
+    segmentElapsed = 0;
+    render();
   }
 
   function tick() {
@@ -423,8 +470,7 @@
   function reset() {
     pause();                // 리셋은 기록하지 않음
     mode = "focus";
-    modeLabel.textContent = "집중 시간";
-    document.body.classList.remove("break-mode");
+    applyModeUI();
     remaining = FOCUS_SECONDS;
     segmentElapsed = 0;
     render();
@@ -543,6 +589,8 @@
 
   startPauseBtn.addEventListener("click", () => running ? stopAndRecord() : start());
   resetBtn.addEventListener("click", reset);
+  focusModeBtn.addEventListener("click", () => setMode("focus"));
+  breakModeBtn.addEventListener("click", () => setMode("break"));
 
   // ── 인증(로그인) ───────────────────────────────────────────────
   function setAuthMsg(text, ok = false) {
