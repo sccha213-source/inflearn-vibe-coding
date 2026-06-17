@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nike — Just Do It</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <nav class="nav">
+      <a href="#" class="logo">
+        <svg viewBox="0 0 400 150" fill="white" xmlns="http://www.w3.org/2000/svg" class="swoosh">
+          <path d="M0 130 C60 80, 120 40, 200 20 C260 5, 340 10, 390 30 C350 45, 290 60, 220 80 C150 100, 70 115, 0 130Z"/>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#">New &amp; Featured</a></li>
+        <li><a href="#">Men</a></li>
+        <li><a href="#">Women</a></li>
+        <li><a href="#">Kids</a></li>
+        <li><a href="#">Sale</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <button class="icon-btn" aria-label="Favorites">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" aria-label="Cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">New Arrival</p>
+      <h1 class="hero-title">AIR MAX<br/><span>PULSE</span></h1>
+      <p class="hero-sub">심장이 뛰는 순간,<br/>신발이 반응한다.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn btn-white">지금 쇼핑하기</a>
+        <a href="#" class="btn btn-outline">더 알아보기</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="shoe-placeholder">
+        <svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stylized shoe silhouette -->
+          <ellipse cx="250" cy="260" rx="200" ry="20" fill="rgba(255,255,255,0.1)"/>
+          <path d="M80 200 C100 180, 140 160, 200 155 C240 150, 280 152, 320 148 C360 144, 390 140, 420 145 L430 160 C410 158, 380 162, 340 168 C290 175, 240 180, 200 185 C160 190, 120 195, 95 210 Z" fill="white" opacity="0.9"/>
+          <path d="M80 200 C85 210, 90 220, 100 228 C120 240, 160 245, 200 245 C250 245, 320 240, 380 230 L430 160 C390 140, 360 144, 320 148 C280 152, 240 150, 200 155 C140 160, 100 180, 80 200Z" fill="#e5e5e5" opacity="0.95"/>
+          <path d="M100 228 C110 235, 140 242, 180 244 L380 230 C350 238, 280 248, 200 248 C155 248, 118 241, 100 228Z" fill="#c8c8c8"/>
+          <path d="M200 155 C220 145, 250 138, 280 135 C310 132, 340 136, 360 142 L340 168 C320 162, 300 158, 280 158 C260 158, 235 162, 215 168Z" fill="#ff0000" opacity="0.85"/>
+          <circle cx="320" cy="155" r="18" fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="2"/>
+          <text x="311" y="161" fill="white" font-size="14" font-weight="bold" font-family="Arial">AIR</text>
+        </svg>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>스크롤</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+      <span>JUST DO IT</span><span>·</span>
+    </div>
+  </div>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="products" id="products">
+    <div class="section-header">
+      <h2>인기 제품</h2>
+      <a href="#" class="see-all">전체 보기 →</a>
+    </div>
+    <div class="product-grid">
+
+      <div class="product-card">
+        <div class="product-img" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+          <div class="product-badge">Best Seller</div>
+          <svg class="shoe-svg" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 120 C60 105, 100 95, 150 92 C185 90, 220 92, 250 88 L260 100 C235 104, 200 108, 160 112 C120 116, 80 120, 55 130Z" fill="#e8e8e8"/>
+            <path d="M40 120 C42 128, 48 135, 60 140 C80 148, 120 150, 160 150 C210 150, 250 146, 270 138 L260 100 C250 88, 220 92, 185 90 C150 92, 100 105, 40 120Z" fill="white"/>
+            <path d="M150 92 C165 86, 185 82, 205 80 C220 78, 238 82, 248 88 L235 106 C225 100, 210 96, 195 96 C180 96, 165 100, 155 108Z" fill="#c00"/>
+            <path d="M60 140 C80 148, 130 153, 180 152 L270 138 C250 146, 210 150, 160 150 C120 150, 80 148, 60 140Z" fill="#ddd"/>
+          </svg>
+        </div>
+        <div class="product-info">
+          <span class="product-category">러닝</span>
+          <h3>Nike Air Max 270</h3>
+          <p class="product-desc">최대 에어 유닛, 최대 편안함</p>
+          <div class="product-footer">
+            <span class="price">₩179,000</span>
+            <button class="add-btn">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img" style="background: linear-gradient(135deg, #0f3460 0%, #533483 100%);">
+          <div class="product-badge new">New</div>
+          <svg class="shoe-svg" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 120 C60 105, 100 95, 150 92 C185 90, 220 92, 250 88 L260 100 C235 104, 200 108, 160 112 C120 116, 80 120, 55 130Z" fill="#f0f0f0"/>
+            <path d="M40 120 C42 128, 48 135, 60 140 C80 148, 120 150, 160 150 C210 150, 250 146, 270 138 L260 100 C250 88, 220 92, 185 90 C150 92, 100 105, 40 120Z" fill="#f5f5f5"/>
+            <path d="M150 92 C165 86, 185 82, 205 80 C220 78, 238 82, 248 88 L235 106 C225 100, 210 96, 195 96 C180 96, 165 100, 155 108Z" fill="#ff6b35"/>
+            <path d="M60 140 C80 148, 130 153, 180 152 L270 138 C250 146, 210 150, 160 150 C120 150, 80 148, 60 140Z" fill="#e0e0e0"/>
+          </svg>
+        </div>
+        <div class="product-info">
+          <span class="product-category">라이프스타일</span>
+          <h3>Nike Dunk Low</h3>
+          <p class="product-desc">클래식이 새롭게 돌아왔다</p>
+          <div class="product-footer">
+            <span class="price">₩129,000</span>
+            <button class="add-btn">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img" style="background: linear-gradient(135deg, #1b1b1b 0%, #2d2d2d 100%);">
+          <svg class="shoe-svg" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 120 C60 105, 100 95, 150 92 C185 90, 220 92, 250 88 L260 100 C235 104, 200 108, 160 112 C120 116, 80 120, 55 130Z" fill="#888"/>
+            <path d="M40 120 C42 128, 48 135, 60 140 C80 148, 120 150, 160 150 C210 150, 250 146, 270 138 L260 100 C250 88, 220 92, 185 90 C150 92, 100 105, 40 120Z" fill="#666"/>
+            <path d="M150 92 C165 86, 185 82, 205 80 C220 78, 238 82, 248 88 L235 106 C225 100, 210 96, 195 96 C180 96, 165 100, 155 108Z" fill="#00ff87"/>
+            <path d="M60 140 C80 148, 130 153, 180 152 L270 138 C250 146, 210 150, 160 150 C120 150, 80 148, 60 140Z" fill="#555"/>
+          </svg>
+        </div>
+        <div class="product-info">
+          <span class="product-category">트레이닝</span>
+          <h3>Nike React Infinity</h3>
+          <p class="product-desc">부상을 줄이고, 달림을 늘린다</p>
+          <div class="product-footer">
+            <span class="price">₩159,000</span>
+            <button class="add-btn">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img" style="background: linear-gradient(135deg, #2c1810 0%, #4a2c20 100%);">
+          <div class="product-badge sale">SALE</div>
+          <svg class="shoe-svg" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 120 C60 105, 100 95, 150 92 C185 90, 220 92, 250 88 L260 100 C235 104, 200 108, 160 112 C120 116, 80 120, 55 130Z" fill="#d4a574"/>
+            <path d="M40 120 C42 128, 48 135, 60 140 C80 148, 120 150, 160 150 C210 150, 250 146, 270 138 L260 100 C250 88, 220 92, 185 90 C150 92, 100 105, 40 120Z" fill="#c49a6c"/>
+            <path d="M150 92 C165 86, 185 82, 205 80 C220 78, 238 82, 248 88 L235 106 C225 100, 210 96, 195 96 C180 96, 165 100, 155 108Z" fill="#8B4513"/>
+            <path d="M60 140 C80 148, 130 153, 180 152 L270 138 C250 146, 210 150, 160 150 C120 150, 80 148, 60 140Z" fill="#b8956a"/>
+          </svg>
+        </div>
+        <div class="product-info">
+          <span class="product-category">농구</span>
+          <h3>Air Jordan 1 Retro</h3>
+          <p class="product-desc">전설은 시대를 초월한다</p>
+          <div class="product-footer">
+            <div>
+              <span class="price">₩149,000</span>
+              <span class="price-original">₩199,000</span>
+            </div>
+            <button class="add-btn">+</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BANNER CTA -->
+  <section class="cta-banner">
+    <div class="cta-content">
+      <h2>JUST DO IT.</h2>
+      <p>한계를 넘어서는 순간,<br/>당신은 이미 달라져 있습니다.</p>
+      <a href="#" class="btn btn-white">컬렉션 보기</a>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="categories">
+    <div class="section-header">
+      <h2>카테고리</h2>
+    </div>
+    <div class="category-grid">
+      <a href="#" class="category-card">
+        <div class="cat-img" style="background: linear-gradient(160deg, #1a1a1a 60%, #e00 100%);">
+          <span class="cat-icon">🏃</span>
+        </div>
+        <span class="cat-name">러닝</span>
+      </a>
+      <a href="#" class="category-card">
+        <div class="cat-img" style="background: linear-gradient(160deg, #1a1a1a 60%, #0066ff 100%);">
+          <span class="cat-icon">⚽</span>
+        </div>
+        <span class="cat-name">축구</span>
+      </a>
+      <a href="#" class="category-card">
+        <div class="cat-img" style="background: linear-gradient(160deg, #1a1a1a 60%, #ff6b00 100%);">
+          <span class="cat-icon">🏀</span>
+        </div>
+        <span class="cat-name">농구</span>
+      </a>
+      <a href="#" class="category-card">
+        <div class="cat-img" style="background: linear-gradient(160deg, #1a1a1a 60%, #00cc66 100%);">
+          <span class="cat-icon">💪</span>
+        </div>
+        <span class="cat-name">트레이닝</span>
+      </a>
+      <a href="#" class="category-card">
+        <div class="cat-img" style="background: linear-gradient(160deg, #1a1a1a 60%, #9933ff 100%);">
+          <span class="cat-icon">✨</span>
+        </div>
+        <span class="cat-name">라이프스타일</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter">
+    <div class="newsletter-inner">
+      <div class="newsletter-text">
+        <h2>NIKE MEMBER</h2>
+        <p>최신 컬렉션, 특별 혜택, 이벤트 소식을<br/>가장 먼저 받아보세요.</p>
+      </div>
+      <form class="newsletter-form" onsubmit="handleSubscribe(event)">
+        <input type="email" placeholder="이메일 주소를 입력하세요" required />
+        <button type="submit" class="btn btn-black">구독하기</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>도움말</h4>
+        <ul>
+          <li><a href="#">주문 상태</a></li>
+          <li><a href="#">배송 안내</a></li>
+          <li><a href="#">반품 정책</a></li>
+          <li><a href="#">사이즈 가이드</a></li>
+          <li><a href="#">고객 센터</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>회사 소개</h4>
+        <ul>
+          <li><a href="#">Nike 소개</a></li>
+          <li><a href="#">투자자 관계</a></li>
+          <li><a href="#">지속 가능성</a></li>
+          <li><a href="#">채용 정보</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Nike 커뮤니티</h4>
+        <ul>
+          <li><a href="#">Nike Run Club</a></li>
+          <li><a href="#">Nike Training Club</a></li>
+          <li><a href="#">Nike Journal</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>팔로우</h4>
+        <div class="social-links">
+          <a href="#" class="social-btn">Instagram</a>
+          <a href="#" class="social-btn">Twitter</a>
+          <a href="#" class="social-btn">YouTube</a>
+          <a href="#" class="social-btn">Facebook</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <svg viewBox="0 0 200 75" fill="white" class="footer-swoosh">
+        <path d="M0 65 C30 40, 60 20, 100 10 C130 3, 170 5, 195 15 C175 22, 145 30, 110 40 C75 50, 35 57, 0 65Z"/>
+      </svg>
+      <div class="footer-legal">
+        <span>© 2026 Nike, Inc. All Rights Reserved</span>
+        <div class="legal-links">
+          <a href="#">개인정보 처리방침</a>
+          <a href="#">이용약관</a>
+          <a href="#">쿠키 설정</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

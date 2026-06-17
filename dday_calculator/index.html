@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>D-Day 계산</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fde2e4 0%, #e2ece9 50%, #dfe7fd 100%);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+    color: #5b5560;
+  }
+
+  .card {
+    width: min(420px, 92vw);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 28px;
+    padding: 48px 40px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(180, 160, 200, 0.25);
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #6d6875;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #9a93a3;
+    margin-bottom: 32px;
+  }
+
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  input[type="date"] {
+    padding: 14px 18px;
+    font-size: 1.05rem;
+    font-family: inherit;
+    color: #5b5560;
+    background: #ffffff;
+    border: 2px solid #e8dff5;
+    border-radius: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  input[type="date"]:focus {
+    border-color: #cdb4db;
+    box-shadow: 0 0 0 4px rgba(205, 180, 219, 0.25);
+  }
+
+  button {
+    padding: 14px 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #ffffff;
+    background: linear-gradient(135deg, #cdb4db, #a2d2ff);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.2s ease;
+  }
+
+  button:hover { filter: brightness(1.06); }
+  button:active { transform: scale(0.97); }
+
+  .result {
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .dday {
+    font-size: clamp(3.5rem, 16vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #b388eb, #7eb2ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .dday.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .dday.past {
+    background: linear-gradient(135deg, #f4978e, #fbc4ab);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .detail {
+    font-size: 0.92rem;
+    color: #9a93a3;
+  }
+
+  .error {
+    font-size: 0.95rem;
+    color: #e07a8b;
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>D-Day 계산기</h1>
+    <p class="subtitle">목표 날짜를 선택하면 남은 날을 알려드려요</p>
+
+    <div class="input-row">
+      <input type="date" id="targetDate" />
+      <button id="calcBtn">계산하기</button>
+    </div>
+
+    <div class="result">
+      <div class="dday" id="ddayDisplay"></div>
+      <div class="detail" id="detailText"></div>
+    </div>
+  </main>
+
+<script>
+  const targetInput = document.getElementById("targetDate");
+  const calcBtn = document.getElementById("calcBtn");
+  const ddayDisplay = document.getElementById("ddayDisplay");
+  const detailText = document.getElementById("detailText");
+
+  function calculate() {
+    const value = targetInput.value;
+
+    ddayDisplay.classList.remove("show");
+
+    if (!value) {
+      ddayDisplay.textContent = "";
+      detailText.innerHTML = '<span class="error">날짜를 먼저 선택해주세요!</span>';
+      return;
+    }
+
+    // 자정 기준으로 비교해 시간대 영향 제거
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [y, m, d] = value.split("-").map(Number);
+    const target = new Date(y, m - 1, d);
+
+    const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+    ddayDisplay.classList.remove("past");
+
+    let label, detail;
+    if (diffDays > 0) {
+      label = `D-${diffDays}`;
+      detail = `${y}년 ${m}월 ${d}일까지 ${diffDays}일 남았어요`;
+    } else if (diffDays === 0) {
+      label = "D-Day";
+      detail = "바로 오늘이에요! 🎉";
+    } else {
+      label = `D+${Math.abs(diffDays)}`;
+      detail = `${y}년 ${m}월 ${d}일로부터 ${Math.abs(diffDays)}일 지났어요`;
+      ddayDisplay.classList.add("past");
+    }
+
+    ddayDisplay.textContent = label;
+    detailText.textContent = detail;
+
+    // 트랜지션 재생을 위해 한 프레임 뒤에 show 적용
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => ddayDisplay.classList.add("show"));
+    });
+  }
+
+  calcBtn.addEventListener("click", calculate);
+  targetInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") calculate();
+  });
+</script>
+</body>
+</html>

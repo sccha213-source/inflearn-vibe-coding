@@ -1,0 +1,13 @@
+# Claude Code 로컬 설정 (개인 권한/키 포함)
+.claude/settings.local.json
+
+# 자동 다운로드된 third-party 스킬 (도구 캐시)
+.claude/skills/
+.agents/
+
+# OS 파일
+Thumbs.db
+.DS_Store
+
+# 임시 파일
+*.tmp

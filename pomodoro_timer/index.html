@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pomodoro Timer</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181b24;
+    --surface-2: #1f2330;
+    --text: #e8eaf0;
+    --text-dim: #8b90a0;
+    --focus: #ff6b6b;
+    --break: #4ecdc4;
+    --accent: var(--focus);
+    --radius: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 20%, #161a26 0%, var(--bg) 70%);
+    color: var(--text);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  }
+
+  .card {
+    width: min(420px, 92vw);
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius);
+    padding: 48px 40px 40px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  h1 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  /* 모드 배지 */
+  .mode {
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+  }
+
+  .time {
+    font-size: clamp(4rem, 18vw, 5.5rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    margin-bottom: 30px;
+  }
+
+  /* 진행 바 */
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, white));
+    transition: width 0.4s linear, background 0.3s ease;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  button {
+    flex: 1;
+    padding: 14px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.2s ease, background 0.3s ease;
+  }
+
+  button:active { transform: scale(0.96); }
+
+  #startPauseBtn {
+    background: var(--accent);
+    color: #0f1117;
+  }
+  #startPauseBtn:hover { filter: brightness(1.1); }
+
+  #resetBtn {
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  #resetBtn:hover { color: var(--text); filter: brightness(1.15); }
+
+  .session-count {
+    margin-top: 26px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+  .session-count + .session-count { margin-top: 4px; }
+
+  /* 일간 사용량 */
+  .daily-usage {
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    text-align: left;
+  }
+  .daily-usage h2 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .day-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+  .day-label {
+    font-size: 0.74rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .day-bar-track {
+    height: 9px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .day-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--focus), color-mix(in srgb, var(--focus) 55%, white));
+    transition: width 0.5s ease;
+  }
+  .day-count {
+    font-size: 0.74rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .day-row.is-today .day-label,
+  .day-row.is-today .day-count { color: var(--focus); font-weight: 700; }
+  .daily-empty {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  /* 로그인 화면 */
+  .auth-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+  .auth-form { display: flex; flex-direction: column; gap: 12px; }
+  .auth-form input {
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    outline: none;
+    transition: border 0.2s ease;
+  }
+  .auth-form input:focus { border-color: var(--accent); }
+  .auth-form input::placeholder { color: var(--text-dim); }
+  .auth-form .buttons { margin-top: 4px; }
+  #signupBtn {
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  #signupBtn:hover { color: var(--text); filter: brightness(1.15); }
+  .auth-msg {
+    min-height: 18px;
+    font-size: 0.8rem;
+    color: var(--focus);
+    margin-top: 6px;
+  }
+  .auth-msg.ok { color: var(--break); }
+
+  /* 로그인 사용자 바 */
+  .user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .user-email {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .logout-btn {
+    flex: none;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--surface-2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .logout-btn:hover { color: var(--text); filter: brightness(1.15); }
+
+  /* 휴식 모드 색상 전환 */
+  body.break-mode { --accent: var(--break); }
+</style>
+</head>
+<body>
+  <!-- 로그인 화면 -->
+  <main class="card" id="authCard" style="display:none">
+    <h1>Pomodoro</h1>
+    <p class="auth-subtitle">로그인하고 내 집중 기록을 저장하세요</p>
+    <div class="auth-form">
+      <input type="email" id="authEmail" placeholder="이메일" autocomplete="email" />
+      <input type="password" id="authPassword" placeholder="비밀번호 (6자 이상)" autocomplete="current-password" />
+      <div class="buttons">
+        <button id="loginBtn">로그인</button>
+        <button id="signupBtn">회원가입</button>
+      </div>
+      <div class="auth-msg" id="authMsg"></div>
+    </div>
+  </main>
+
+  <!-- 타이머 화면 -->
+  <main class="card" id="appCard" style="display:none">
+    <div class="user-bar">
+      <span class="user-email" id="userEmail"></span>
+      <button class="logout-btn" id="logoutBtn">로그아웃</button>
+    </div>
+    <h1>Pomodoro</h1>
+    <div class="mode" id="modeLabel">집중 시간</div>
+    <div class="time" id="timeDisplay">25:00</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="buttons">
+      <button id="startPauseBtn">시작</button>
+      <button id="resetBtn">리셋</button>
+    </div>
+    <div class="session-count" id="sessionCount">완료한 뽀모도로: 0</div>
+    <div class="session-count" id="todayCount">오늘: 0</div>
+
+    <section class="daily-usage">
+      <h2>최근 7일 사용량</h2>
+      <div id="dailyChart"></div>
+    </section>
+  </main>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  // ── Supabase 설정 ──────────────────────────────────────────────
+  // SUPABASE_ANON_KEY 는 대시보드 > Project Settings > API > "anon public" 키로 교체하세요.
+  const SUPABASE_URL = "https://maimbqslapjsxgngwjev.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_2ZZlJN-5sG0zZAe1RjSG0Q_esB2qivQ";
+
+  // 'pomodoro' 스키마를 기본으로 사용
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: "pomodoro" },
+  });
+  // ───────────────────────────────────────────────────────────────
+
+  const FOCUS_SECONDS = 25 * 60;
+  const BREAK_SECONDS = 5 * 60;
+
+  const timeDisplay = document.getElementById("timeDisplay");
+  const progressFill = document.getElementById("progressFill");
+  const startPauseBtn = document.getElementById("startPauseBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const modeLabel = document.getElementById("modeLabel");
+  const sessionCount = document.getElementById("sessionCount");
+  const todayCount = document.getElementById("todayCount");
+  const dailyChart = document.getElementById("dailyChart");
+
+  // 인증 관련 요소
+  const authCard = document.getElementById("authCard");
+  const appCard = document.getElementById("appCard");
+  const authEmail = document.getElementById("authEmail");
+  const authPassword = document.getElementById("authPassword");
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const authMsg = document.getElementById("authMsg");
+  const userEmail = document.getElementById("userEmail");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  let mode = "focus";            // "focus" | "break"
+  let remaining = FOCUS_SECONDS;
+  let running = false;
+  let intervalId = null;
+  let completedSessions = 0;
+  let segmentElapsed = 0;        // 마지막 '시작' 이후 흐른 초 (중지 시 기록용)
+
+  function totalSeconds() {
+    return mode === "focus" ? FOCUS_SECONDS : BREAK_SECONDS;
+  }
+
+  function render() {
+    const m = String(Math.floor(remaining / 60)).padStart(2, "0");
+    const s = String(remaining % 60).padStart(2, "0");
+    timeDisplay.textContent = `${m}:${s}`;
+    document.title = `${m}:${s} — ${mode === "focus" ? "집중" : "휴식"}`;
+
+    const progress = ((totalSeconds() - remaining) / totalSeconds()) * 100;
+    progressFill.style.width = `${progress}%`;
+  }
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.6);
+    } catch (e) { /* 오디오 미지원 환경 무시 */ }
+  }
+
+  function switchMode() {
+    if (mode === "focus") {
+      completedSessions++;
+      sessionCount.textContent = `완료한 뽀모도로: ${completedSessions}`;
+      saveSession("focus", FOCUS_SECONDS);  // DB에 기록
+      mode = "break";
+      modeLabel.textContent = "휴식 시간";
+      document.body.classList.add("break-mode");
+    } else {
+      mode = "focus";
+      modeLabel.textContent = "집중 시간";
+      document.body.classList.remove("break-mode");
+    }
+    remaining = totalSeconds();
+  }
+
+  function tick() {
+    remaining--;
+    segmentElapsed++;
+    if (remaining <= 0) {
+      remaining = 0;
+      render();
+      beep();
+      switchMode();
+      segmentElapsed = 0;   // 새 세션(모드) 시작 → 구간 초기화
+    }
+    render();
+  }
+
+  function start() {
+    running = true;
+    segmentElapsed = 0;     // 이번 '시작'부터 새로 카운트
+    startPauseBtn.textContent = "정지";
+    intervalId = setInterval(tick, 1000);
+  }
+
+  // 타이머 정지(인터벌만 멈춤) — 기록은 하지 않음
+  function pause() {
+    running = false;
+    startPauseBtn.textContent = "시작";
+    clearInterval(intervalId);
+  }
+
+  // 사용자가 '정지'를 눌렀을 때 → 흐른 시간을 DB에 기록하고 정지
+  function stopAndRecord() {
+    if (segmentElapsed > 0) {
+      saveSession(mode, segmentElapsed);
+    }
+    pause();
+    segmentElapsed = 0;
+  }
+
+  function reset() {
+    pause();                // 리셋은 기록하지 않음
+    mode = "focus";
+    modeLabel.textContent = "집중 시간";
+    document.body.classList.remove("break-mode");
+    remaining = FOCUS_SECONDS;
+    segmentElapsed = 0;
+    render();
+  }
+
+  // ── Supabase 연동 ──────────────────────────────────────────────
+  // 완료한 세션을 DB에 저장
+  async function saveSession(sessionMode, durationSeconds) {
+    const { error } = await supabase
+      .from("sessions")
+      .insert({ mode: sessionMode, duration_seconds: durationSeconds });
+    if (error) {
+      console.error("세션 저장 실패:", error.message);
+      return;
+    }
+    loadStats();        // 저장 후 통계 갱신
+    loadDailyUsage();   // 일간 사용량 갱신
+  }
+
+  // 누적/오늘 통계를 불러와 화면에 반영
+  async function loadStats() {
+    // 누적 완료 개수 (focus 세션)
+    const { count: total, error: totalErr } = await supabase
+      .from("sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("mode", "focus")
+      .gte("duration_seconds", FOCUS_SECONDS);   // 완료한(25분 꽉 채운) 세션만
+
+    if (totalErr) {
+      console.error("통계 불러오기 실패:", totalErr.message);
+      return;
+    }
+
+    // 오늘 0시 이후 완료 개수
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const { count: today, error: todayErr } = await supabase
+      .from("sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("mode", "focus")
+      .gte("duration_seconds", FOCUS_SECONDS)    // 완료한 세션만
+      .gte("completed_at", startOfDay.toISOString());
+
+    if (todayErr) {
+      console.error("오늘 통계 불러오기 실패:", todayErr.message);
+      return;
+    }
+
+    completedSessions = total ?? 0;
+    sessionCount.textContent = `완료한 뽀모도로: ${completedSessions}`;
+    todayCount.textContent = `오늘: ${today ?? 0}`;
+  }
+
+  // 로컬 날짜 키(YYYY-MM-DD) 생성
+  function dateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  // 최근 7일 일간 사용량을 불러와 막대 그래프로 표시
+  async function loadDailyUsage() {
+    const DAYS = 7;
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - (DAYS - 1));  // 6일 전 0시부터
+
+    const { data, error } = await supabase
+      .from("sessions")
+      .select("completed_at")
+      .eq("mode", "focus")
+      .gte("duration_seconds", FOCUS_SECONDS)    // 완료한 세션만
+      .gte("completed_at", since.toISOString());
+
+    if (error) {
+      console.error("일간 사용량 불러오기 실패:", error.message);
+      return;
+    }
+
+    // 날짜별 개수 집계
+    const counts = {};
+    for (const row of data ?? []) {
+      const key = dateKey(new Date(row.completed_at));
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+
+    // 최근 7일 배열 구성 (오래된 날 → 오늘)
+    const todayKey = dateKey(new Date());
+    const week = ["일", "월", "화", "수", "목", "금", "토"];
+    const rows = [];
+    for (let i = DAYS - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const key = dateKey(d);
+      rows.push({
+        key,
+        label: `${d.getMonth() + 1}/${d.getDate()}(${week[d.getDay()]})`,
+        count: counts[key] ?? 0,
+        isToday: key === todayKey,
+      });
+    }
+
+    const max = Math.max(1, ...rows.map((r) => r.count));
+    dailyChart.innerHTML = rows
+      .map((r) => `
+        <div class="day-row${r.isToday ? " is-today" : ""}">
+          <span class="day-label">${r.label}</span>
+          <span class="day-bar-track"><span class="day-bar" style="width:${(r.count / max) * 100}%"></span></span>
+          <span class="day-count">${r.count}</span>
+        </div>`)
+      .join("");
+  }
+  // ───────────────────────────────────────────────────────────────
+
+  startPauseBtn.addEventListener("click", () => running ? stopAndRecord() : start());
+  resetBtn.addEventListener("click", reset);
+
+  // ── 인증(로그인) ───────────────────────────────────────────────
+  function setAuthMsg(text, ok = false) {
+    authMsg.textContent = text;
+    authMsg.classList.toggle("ok", ok);
+  }
+
+  // 로그인 상태에 따라 화면 전환
+  function showApp(session) {
+    if (session) {
+      authCard.style.display = "none";
+      appCard.style.display = "";
+      userEmail.textContent = session.user.email;
+      loadStats();
+      loadDailyUsage();
+    } else {
+      reset();                      // 타이머 정지/초기화
+      appCard.style.display = "none";
+      authCard.style.display = "";
+    }
+  }
+
+  async function handleLogin() {
+    setAuthMsg("로그인 중...");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: authEmail.value.trim(),
+      password: authPassword.value,
+    });
+    if (error) setAuthMsg("로그인 실패: " + error.message);
+    else setAuthMsg("");
+  }
+
+  async function handleSignup() {
+    setAuthMsg("회원가입 중...");
+    const { data, error } = await supabase.auth.signUp({
+      email: authEmail.value.trim(),
+      password: authPassword.value,
+    });
+    if (error) {
+      setAuthMsg("회원가입 실패: " + error.message);
+    } else if (data.session) {
+      setAuthMsg("가입 완료! 바로 로그인됩니다.", true);   // 이메일 확인 꺼진 경우
+    } else {
+      setAuthMsg("확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인하세요.", true);
+    }
+  }
+
+  loginBtn.addEventListener("click", handleLogin);
+  signupBtn.addEventListener("click", handleSignup);
+  authPassword.addEventListener("keydown", (e) => { if (e.key === "Enter") handleLogin(); });
+  logoutBtn.addEventListener("click", () => supabase.auth.signOut());
+
+  // 로그인 상태 변화 감지 (로그인/로그아웃/새로고침 시 자동 호출)
+  supabase.auth.onAuthStateChange((_event, session) => showApp(session));
+
+  // 페이지 로드 시 현재 세션 확인
+  render();
+  supabase.auth.getSession().then(({ data }) => showApp(data.session));
+</script>
+</body>
+</html>

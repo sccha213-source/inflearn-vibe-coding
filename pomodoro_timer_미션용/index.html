@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>뽀모도로 타이머</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #f5f5f5;
+      --muted: #9e9e9e;
+      --accent: #03c75a;
+      --accent-break: #2db4ff;
+      --track: #2c2c2c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .mode {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      transition: color 0.3s ease;
+    }
+
+    .mode.break {
+      color: var(--accent-break);
+    }
+
+    .time {
+      font-size: 5rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      margin-bottom: 1.75rem;
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: var(--track);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 1s linear, background 0.3s ease;
+    }
+
+    .progress-bar.break {
+      background: var(--accent-break);
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.85rem 0;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      background: var(--track);
+      transition: transform 0.1s ease, opacity 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .session-count {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">PomodoroN</div>
+    <div class="mode" id="mode">집중 시간</div>
+    <div class="time" id="time">25:00</div>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="startBtn">시작</button>
+      <button id="stopBtn">정지</button>
+      <button id="resetBtn">리셋</button>
+    </div>
+    <div class="session-count" id="sessionCount">완료한 집중 세션: 0</div>
+  </div>
+
+  <script>
+    const FOCUS_MIN = 25;
+    const BREAK_MIN = 5;
+
+    const modeEl = document.getElementById("mode");
+    const timeEl = document.getElementById("time");
+    const progressBar = document.getElementById("progressBar");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const sessionCountEl = document.getElementById("sessionCount");
+
+    let isBreak = false;
+    let totalSeconds = FOCUS_MIN * 60;
+    let remaining = totalSeconds;
+    let timerId = null;
+    let completedSessions = 0;
+
+    function format(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, "0");
+      const s = String(sec % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function render() {
+      timeEl.textContent = format(remaining);
+      const progress = ((totalSeconds - remaining) / totalSeconds) * 100;
+      progressBar.style.width = `${progress}%`;
+      document.title = `${format(remaining)} · ${isBreak ? "휴식" : "집중"}`;
+    }
+
+    function applyMode() {
+      if (isBreak) {
+        modeEl.textContent = "휴식 시간";
+        modeEl.classList.add("break");
+        progressBar.classList.add("break");
+        startBtn.style.background = "var(--accent-break)";
+      } else {
+        modeEl.textContent = "집중 시간";
+        modeEl.classList.remove("break");
+        progressBar.classList.remove("break");
+        startBtn.style.background = "var(--accent)";
+      }
+    }
+
+    function switchMode() {
+      if (!isBreak) {
+        completedSessions++;
+        sessionCountEl.textContent = `완료한 집중 세션: ${completedSessions}`;
+      }
+      isBreak = !isBreak;
+      totalSeconds = (isBreak ? BREAK_MIN : FOCUS_MIN) * 60;
+      remaining = totalSeconds;
+      applyMode();
+      render();
+    }
+
+    function tick() {
+      if (remaining > 0) {
+        remaining--;
+        render();
+      } else {
+        switchMode();
+        start();
+      }
+    }
+
+    function start() {
+      if (timerId !== null) return;
+      timerId = setInterval(tick, 1000);
+      startBtn.textContent = "재개";
+    }
+
+    function stop() {
+      clearInterval(timerId);
+      timerId = null;
+    }
+
+    function reset() {
+      stop();
+      isBreak = false;
+      totalSeconds = FOCUS_MIN * 60;
+      remaining = totalSeconds;
+      startBtn.textContent = "시작";
+      applyMode();
+      render();
+    }
+
+    startBtn.addEventListener("click", start);
+    stopBtn.addEventListener("click", stop);
+    resetBtn.addEventListener("click", reset);
+
+    applyMode();
+    render();
+  </script>
+</body>
+</html>
