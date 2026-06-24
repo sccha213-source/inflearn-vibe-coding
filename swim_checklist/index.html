@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0e4d80" />
+<title>🏊 수영 자세 체크 & 연습기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #4fc3f0;   /* 밝은 하늘 */
+    --c2: #1f93d8;   /* 메인 블루 */
+    --c3: #0e6bb0;   /* 진한 블루 */
+    --c4: #084267;   /* 딥 오션 (텍스트/포인트) */
+    --good: #07a888;
+    --good-soft: #cdf3eb;
+    --hard: #ef5d7e;
+    --hard-soft: #ffdce4;
+    --ink: #062f4a;        /* 거의 네이비 — 강한 대비 */
+    --ink-soft: #3f6d88;
+    --card: #ffffff;
+    --line: #cfe6f4;
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    font-family: "Gowun Dodum", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    background:
+      radial-gradient(900px 500px at 85% -8%, #2aa0e0 0%, transparent 55%),
+      radial-gradient(800px 480px at -8% 8%, #1d7fc4 0%, transparent 52%),
+      linear-gradient(180deg, #0e6bb0 0%, #0b5690 45%, #084267 100%);
+    background-attachment: fixed;
+    padding: 0 0 70px;
+    overflow-x: hidden;
+  }
+
+  .font-title { font-family: "Jua", sans-serif; font-weight: 400; }
+
+  /* 떠다니는 물방울 */
+  .bubbles { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .bubble {
+    position: absolute; bottom: -60px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), rgba(255,255,255,0.05));
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    12% { opacity: 0.5; }
+    90% { opacity: 0.35; }
+    100% { transform: translateY(-115vh) scale(1.25); opacity: 0; }
+  }
+
+  header {
+    position: relative; z-index: 1;
+    padding: 32px 20px 54px; text-align: center; color: #fff;
+    background: linear-gradient(135deg, var(--c1), var(--c2) 50%, var(--c3));
+    border-radius: 0 0 34px 34px;
+    box-shadow: 0 14px 30px rgba(4,40,70,0.45);
+    overflow: hidden;
+  }
+  header::before {
+    content: ""; position: absolute; top: -40px; right: -30px;
+    width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.14);
+  }
+  header h1 {
+    margin: 0; font-size: 1.9rem; letter-spacing: 0.5px;
+    text-shadow: 0 3px 12px rgba(2,25,45,0.5); position: relative;
+  }
+  header p { margin: 8px 0 0; font-size: 0.92rem; opacity: 0.97; position: relative; }
+  .wave { position: absolute; left: 0; bottom: -1px; width: 100%; line-height: 0; }
+  .wave svg { width: 100%; height: 32px; display: block; }
+
+  main { max-width: 580px; margin: -26px auto 0; padding: 0 15px; position: relative; z-index: 2; }
+
+  /* 탭 */
+  .tabs {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 8px;
+    box-shadow: 0 14px 30px rgba(4,40,70,0.28); margin-bottom: 16px;
+  }
+  .tab {
+    border: none; background: #eef7fc; cursor: pointer;
+    padding: 11px 2px; border-radius: 14px;
+    font-family: "Jua", sans-serif; font-size: 0.86rem;
+    color: var(--c3); line-height: 1.25;
+    transition: transform 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+  }
+  .tab .emoji { display: block; font-size: 1.45rem; margin-bottom: 3px; }
+  .tab.active {
+    background: linear-gradient(135deg, var(--c2), var(--c4)); color: #fff;
+    box-shadow: 0 8px 16px rgba(8,66,103,0.5); transform: translateY(-2px);
+  }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px;
+    box-shadow: 0 14px 30px rgba(4,40,70,0.22);
+    margin-bottom: 16px; animation: floatUp 0.45s ease both;
+  }
+  @keyframes floatUp { from { opacity: 0; transform: translateY(14px);} to { opacity:1; transform:none;} }
+
+  .card-title { font-family: "Jua", sans-serif; margin: 0 0 3px; font-size: 1.28rem; color: var(--c4); display: flex; align-items: center; gap: 8px; }
+  .card .sub { margin: 0 0 14px; font-size: 0.82rem; color: var(--ink-soft); }
+
+  /* 체크포인트 */
+  .checkitem {
+    position: relative; background: #f4fbff; border: 1.5px solid var(--line);
+    border-radius: 15px; padding: 14px 14px 13px; margin-bottom: 11px;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .checkitem.is-good { border-color: var(--good); background: #f0fcf8; box-shadow: 0 6px 16px rgba(7,168,136,0.2); }
+  .checkitem.is-hard { border-color: var(--hard); background: #fff5f7; box-shadow: 0 6px 16px rgba(239,93,126,0.22); }
+  .checkitem .num {
+    position: absolute; top: -9px; left: 14px; width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--c2), var(--c4)); color: #fff;
+    font-family: "Jua", sans-serif; font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 8px rgba(8,66,103,0.45);
+  }
+  .checkitem .label { font-family: "Jua", sans-serif; font-size: 1.02rem; color: var(--ink); margin: 4px 0 3px; }
+  .checkitem .desc { font-size: 0.81rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 11px; }
+
+  .status-btns { display: flex; gap: 9px; }
+  .status-btns button {
+    flex: 1; border: 2px solid var(--line); border-radius: 12px;
+    padding: 10px 4px; font-family: "Gowun Dodum", sans-serif; font-weight: 700;
+    font-size: 0.86rem; cursor: pointer; background: #fff; color: var(--ink-soft);
+    transition: all 0.16s;
+  }
+  .status-btns .good.on { background: linear-gradient(135deg, #12c4a2, var(--good)); color: #fff; border-color: var(--good); box-shadow: 0 6px 14px rgba(7,168,136,0.45); transform: translateY(-1px); }
+  .status-btns .hard.on { background: linear-gradient(135deg, #ff7494, var(--hard)); color: #fff; border-color: var(--hard); box-shadow: 0 6px 14px rgba(239,93,126,0.45); transform: translateY(-1px); }
+
+  .progress-wrap { margin-top: 14px; }
+  .progress-bar { height: 11px; border-radius: 10px; background: #dcecf6; background: #d9edf8; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--good), #2bd9b6); border-radius: 10px; transition: width 0.4s ease; }
+  .progress-chip { font-size: 0.82rem; color: var(--ink-soft); margin-top: 7px; text-align: center; font-weight: 700; }
+
+  .date-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--c2), var(--c4)); color: #fff;
+    font-family: "Jua", sans-serif; font-size: 0.86rem;
+    padding: 7px 15px; border-radius: 22px; margin-bottom: 12px;
+  }
+  textarea {
+    width: 100%; border: 1.5px solid var(--line); border-radius: 13px;
+    padding: 12px; font-family: inherit; font-size: 0.92rem; color: var(--ink);
+    resize: vertical; min-height: 62px; background: #f7fcff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea::placeholder { color: #8fb4c8; }
+  textarea:focus { outline: none; border-color: var(--c2); box-shadow: 0 0 0 4px rgba(31,147,216,0.18); }
+
+  .save-btn {
+    width: 100%; border: none; margin-top: 13px; padding: 15px;
+    border-radius: 15px; font-family: "Jua", sans-serif; font-size: 1.05rem; color: #fff;
+    cursor: pointer; background: linear-gradient(135deg, var(--c2), var(--c4));
+    box-shadow: 0 10px 22px rgba(8,66,103,0.5); transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .save-btn:active { transform: scale(0.97); }
+
+  /* ===== 달력 ===== */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-nav {
+    width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+    background: #eef7fc; color: var(--c3); font-size: 1.1rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .cal-nav:active { background: #d7eefb; }
+  .cal-month { font-family: "Jua", sans-serif; font-size: 1.15rem; color: var(--c4); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-dow { text-align: center; font-size: 0.74rem; font-weight: 700; color: var(--ink-soft); padding-bottom: 4px; }
+  .cal-dow.sun { color: #e0556f; }
+  .cal-dow.sat { color: #2f86d8; }
+  .cal-cell {
+    aspect-ratio: 1 / 1; border: none; background: transparent; cursor: pointer;
+    border-radius: 11px; font-family: "Gowun Dodum", sans-serif; font-size: 0.85rem; font-weight: 700;
+    color: var(--ink); position: relative; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+  }
+  .cal-cell.empty { cursor: default; }
+  .cal-cell.has-rec { background: #e2f4ff; color: var(--c4); }
+  .cal-cell.has-rec::after {
+    content: ""; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    width: 5px; height: 5px; border-radius: 50%; background: var(--good);
+  }
+  .cal-cell.today { box-shadow: inset 0 0 0 2px var(--c2); }
+  .cal-cell.selected { background: linear-gradient(135deg, var(--c2), var(--c4)); color: #fff; transform: scale(1.04); }
+  .cal-cell.selected::after { background: #fff; }
+  .cal-cell:not(.empty):not(.selected):active { background: #d7eefb; }
+
+  /* ===== 히스토리 ===== */
+  .hist-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: #eef7fc; border: 1px solid var(--line); border-radius: 13px;
+    padding: 9px 13px; margin-bottom: 12px;
+  }
+  .hist-banner .lbl { font-family: "Jua", sans-serif; font-size: 0.95rem; color: var(--c4); }
+  .hist-banner button {
+    border: none; background: var(--c3); color: #fff; cursor: pointer;
+    font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 18px;
+  }
+  .history-empty { text-align: center; color: var(--ink-soft); font-size: 0.9rem; padding: 24px 0; line-height: 1.7; }
+  .history-empty .big { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+
+  .hist-item {
+    position: relative; background: #f6fbff; border-radius: 15px; padding: 13px 14px;
+    margin-bottom: 11px; border: 1px solid var(--line);
+    box-shadow: 0 6px 14px rgba(4,40,70,0.1); overflow: hidden;
+  }
+  .hist-item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(180deg, var(--c1), var(--c3)); }
+  .hist-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; padding-left: 4px; }
+  .hist-date { font-family: "Jua", sans-serif; font-size: 0.95rem; color: var(--ink); }
+  .hist-right { display: flex; align-items: center; gap: 7px; }
+  .hist-stroke { font-size: 0.74rem; background: linear-gradient(135deg, var(--c2), var(--c4)); color: #fff; padding: 3px 11px; border-radius: 13px; font-weight: 700; }
+  .hist-stats { font-size: 0.82rem; margin-bottom: 6px; padding-left: 4px; }
+  .hist-stats .g { color: var(--good); font-weight: 700; }
+  .hist-stats .h { color: var(--hard); font-weight: 700; }
+  .hist-memo { font-size: 0.85rem; color: var(--ink); background: #fff; border-radius: 11px; padding: 9px 11px; line-height: 1.5; border: 1px solid var(--line); margin-left: 4px; }
+  .hist-del { background: #fff; border: 1px solid var(--line); border-radius: 9px; color: #9bbcce; font-size: 0.92rem; cursor: pointer; padding: 3px 7px; transition: all 0.15s; }
+  .hist-del:active { color: var(--hard); border-color: var(--hard-soft); }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(90px);
+    background: linear-gradient(135deg, var(--c3), var(--c4)); color: #fff;
+    padding: 13px 24px; border-radius: 26px; font-family: "Jua", sans-serif; font-size: 0.92rem;
+    box-shadow: 0 12px 26px rgba(2,25,45,0.5); opacity: 0;
+    transition: all 0.35s cubic-bezier(0.2,0.8,0.3,1.1); z-index: 60;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  footer { text-align: center; font-size: 0.8rem; color: #d6ecf9; margin-top: 10px; }
+</style>
+</head>
+<body>
+  <div class="bubbles" id="bubbles"></div>
+
+  <header>
+    <h1 class="font-title">🏊 수영 자세 체크</h1>
+    <p>4가지 영법 자세를 체크하고 연습을 기록해요</p>
+    <div class="wave">
+      <svg viewBox="0 0 500 32" preserveAspectRatio="none">
+        <path d="M0,16 C120,38 220,2 320,15 C400,25 460,10 500,18 L500,32 L0,32 Z" fill="#0e6bb0"></path>
+      </svg>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs" id="tabs"></div>
+
+    <div class="card">
+      <h2 class="card-title" id="strokeTitle"></h2>
+      <p class="sub" id="strokeSub"></p>
+      <div id="checklist"></div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-chip" id="progressChip"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="date-badge" id="todayBadge"></span>
+      <textarea id="memo" placeholder="오늘 연습 한 줄 메모 (예: 글라이드 길게 가져가니 덜 힘들었음 💪)"></textarea>
+      <button class="save-btn" id="saveBtn">오늘 기록 저장하기 💾</button>
+    </div>
+
+    <!-- 달력 -->
+    <div class="card">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrev">‹</button>
+        <span class="cal-month font-title" id="calMonth"></span>
+        <button class="cal-nav" id="calNext">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <!-- 히스토리 -->
+    <div class="card">
+      <h2 class="card-title">📅 연습 히스토리</h2>
+      <p class="sub" id="histSub">날짜별로 쌓인 기록이에요 · 달력에서 날짜를 누르면 그날만 볼 수 있어요</p>
+      <div id="histBannerWrap"></div>
+      <div id="history"></div>
+    </div>
+
+    <footer>물처럼 부드럽게, 꾸준히 🐬</footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STROKES = [
+    { key: "freestyle", name: "자유형", emoji: "🏊", desc: "자유형(크롤)의 핵심 자세를 점검해요",
+      points: [
+        { t: "몸의 수평 유지", d: "엉덩이가 가라앉지 않고 수면과 나란히 떠 있나요?" },
+        { t: "팔 동작 (캐치&풀)", d: "물을 잡고(catch) 허벅지까지 길게 밀어주나요?" },
+        { t: "발차기 (플러터킥)", d: "무릎이 아닌 골반에서 시작해 작고 빠르게 차나요?" },
+        { t: "호흡 타이밍", d: "한쪽으로 머리를 굴려 한 박자에 자연스럽게 숨 쉬나요?" },
+        { t: "롤링 (몸통 회전)", d: "어깨와 골반이 한 축으로 함께 회전하나요?" },
+        { t: "글라이드 (뻗기)", d: "앞으로 뻗은 손을 충분히 길게 유지하나요?" }
+      ] },
+    { key: "backstroke", name: "배영", emoji: "🛟", desc: "배영의 핵심 자세를 점검해요",
+      points: [
+        { t: "몸의 수평 유지", d: "배가 수면 위로, 일직선으로 누워 떠 있나요?" },
+        { t: "팔 동작 (S자 풀)", d: "새끼손가락부터 입수해 S자로 물을 밀어내나요?" },
+        { t: "발차기", d: "무릎을 너무 굽히지 않고 발등으로 위로 차나요?" },
+        { t: "호흡 리듬", d: "얼굴이 항상 위를 향해 편하게 호흡하나요?" },
+        { t: "롤링 (몸통 회전)", d: "팔 동작에 맞춰 몸통을 좌우로 회전하나요?" },
+        { t: "머리 고정", d: "머리를 흔들지 않고 시선을 위로 고정하나요?" }
+      ] },
+    { key: "breaststroke", name: "평영", emoji: "🐸", desc: "평영의 핵심 자세를 점검해요",
+      points: [
+        { t: "팔 동작 (하트 그리기)", d: "양손으로 하트를 그리듯 모았다 뻗나요?" },
+        { t: "발차기 (휩킥)", d: "발목을 꺾어 채찍처럼 차고 모아주나요?" },
+        { t: "호흡 타이밍", d: "팔을 당길 때 머리를 들어 숨 쉬나요?" },
+        { t: "몸의 수평 유지", d: "글라이드 시 몸이 수면과 나란한가요?" },
+        { t: "글라이드 (스트림라인)", d: "차고 나서 손끝까지 뻗어 미끄러지나요?" },
+        { t: "동작 순서(풀-숨-킥-글라이드)", d: "당기고 → 숨쉬고 → 차고 → 뻗는 리듬이 맞나요?" }
+      ] },
+    { key: "butterfly", name: "접영", emoji: "🦋", desc: "접영의 핵심 자세를 점검해요",
+      points: [
+        { t: "웨이브 (몸통 파동)", d: "가슴-골반-다리로 물결치듯 움직이나요?" },
+        { t: "팔 동작 (키홀 풀)", d: "양팔로 동시에 물을 잡고 밀어 리커버리하나요?" },
+        { t: "돌핀킥 (2번 차기)", d: "한 사이클에 강·약 두 번의 발차기를 하나요?" },
+        { t: "호흡 타이밍", d: "팔을 밀어낼 때 턱을 앞으로 내밀어 숨 쉬나요?" },
+        { t: "몸의 수평 유지", d: "엉덩이가 너무 가라앉지 않게 유지되나요?" },
+        { t: "리듬감", d: "팔·킥·호흡이 한 박자로 부드럽게 이어지나요?" }
+      ] }
+  ];
+
+  var STORE_KEY = "swim_history_v1";
+  var current = STROKES[0].key;
+  var checks = {};
+  var selectedDateKey = null;          // 달력에서 선택한 날짜
+  var calView = new Date();            // 달력에 보이는 달
+  calView.setDate(1);
+
+  var tabsEl = document.getElementById("tabs");
+  var titleEl = document.getElementById("strokeTitle");
+  var subEl = document.getElementById("strokeSub");
+  var listEl = document.getElementById("checklist");
+  var fillEl = document.getElementById("progressFill");
+  var progressEl = document.getElementById("progressChip");
+  var memoEl = document.getElementById("memo");
+  var historyEl = document.getElementById("history");
+  var bannerWrap = document.getElementById("histBannerWrap");
+  var badgeEl = document.getElementById("todayBadge");
+  var toastEl = document.getElementById("toast");
+  var calGrid = document.getElementById("calGrid");
+  var calMonth = document.getElementById("calMonth");
+
+  function getStroke(key) {
+    for (var i = 0; i < STROKES.length; i++) if (STROKES[i].key === key) return STROKES[i];
+    return STROKES[0];
+  }
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+  function todayKey() { return keyOf(new Date()); }
+
+  function dispDate(d) {
+    var days = ["일","월","화","수","목","금","토"];
+    return d.getFullYear() + "년 " + (d.getMonth()+1) + "월 " + d.getDate() + "일 (" + days[d.getDay()] + ")";
+  }
+  function dispFromKey(k) {
+    var p = k.split("-");
+    return dispDate(new Date(+p[0], +p[1]-1, +p[2]));
+  }
+
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  function saveHistory(arr) { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
+
+  // 구버전 기록(dateKey 없음) 보정: date 문자열에서 추출
+  function recKey(r) {
+    if (r.dateKey) return r.dateKey;
+    var m = /(\d+)년\s*(\d+)월\s*(\d+)일/.exec(r.date || "");
+    if (m) return m[1] + "-" + pad(+m[2]) + "-" + pad(+m[3]);
+    return null;
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    setTimeout(function () { toastEl.classList.remove("show"); }, 1900);
+  }
+
+  function renderTabs() {
+    tabsEl.innerHTML = "";
+    STROKES.forEach(function (s) {
+      var b = document.createElement("button");
+      b.className = "tab" + (s.key === current ? " active" : "");
+      b.innerHTML = '<span class="emoji">' + s.emoji + '</span>' + s.name;
+      b.onclick = function () { current = s.key; checks = {}; memoEl.value = ""; renderTabs(); renderChecklist(); };
+      tabsEl.appendChild(b);
+    });
+  }
+
+  function renderChecklist() {
+    var s = getStroke(current);
+    titleEl.innerHTML = s.emoji + " " + s.name + " 체크리스트";
+    subEl.textContent = s.desc;
+    listEl.innerHTML = "";
+    s.points.forEach(function (p, i) {
+      var st = checks[i];
+      var item = document.createElement("div");
+      item.className = "checkitem" + (st === "good" ? " is-good" : st === "hard" ? " is-hard" : "");
+      item.innerHTML =
+        '<span class="num">' + (i+1) + '</span>' +
+        '<div class="label">' + p.t + '</div>' +
+        '<div class="desc">' + p.d + '</div>' +
+        '<div class="status-btns">' +
+          '<button class="good' + (st==="good"?" on":"") + '" data-i="'+i+'" data-v="good">잘 됐어요 👍</button>' +
+          '<button class="hard' + (st==="hard"?" on":"") + '" data-i="'+i+'" data-v="hard">아직 어려워요 💧</button>' +
+        '</div>';
+      listEl.appendChild(item);
+    });
+    listEl.querySelectorAll("button").forEach(function (btn) {
+      btn.onclick = function () {
+        var i = btn.getAttribute("data-i"), v = btn.getAttribute("data-v");
+        if (checks[i] === v) delete checks[i]; else checks[i] = v;
+        renderChecklist();
+      };
+    });
+    updateProgress();
+  }
+
+  function updateProgress() {
+    var s = getStroke(current);
+    var total = s.points.length, done = Object.keys(checks).length, good = 0;
+    for (var k in checks) if (checks[k] === "good") good++;
+    fillEl.style.width = (good / total * 100) + "%";
+    progressEl.textContent = "체크 " + done + "/" + total + "  ·  잘 됨 " + good + "개";
+  }
+
+  document.getElementById("saveBtn").onclick = function () {
+    if (Object.keys(checks).length === 0 && memoEl.value.trim() === "") {
+      showToast("체크하거나 메모를 남겨주세요 🙂"); return;
+    }
+    var s = getStroke(current), good = 0, hard = 0;
+    for (var k in checks) { if (checks[k] === "good") good++; else if (checks[k] === "hard") hard++; }
+    var now = new Date();
+    var record = {
+      id: Date.now(), date: dispDate(now), dateKey: todayKey(),
+      strokeKey: s.key, strokeName: s.name, strokeEmoji: s.emoji,
+      total: s.points.length, good: good, hard: hard, memo: memoEl.value.trim()
+    };
+    var arr = loadHistory();
+    arr.unshift(record);
+    saveHistory(arr);
+    checks = {}; memoEl.value = "";
+    renderChecklist(); renderCalendar(); renderHistory();
+    showToast("오늘 기록 저장 완료! 🌊");
+  };
+
+  // ===== 달력 =====
+  function renderCalendar() {
+    var arr = loadHistory();
+    var recDays = {};
+    arr.forEach(function (r) { var k = recKey(r); if (k) recDays[k] = true; });
+
+    var y = calView.getFullYear(), m = calView.getMonth();
+    calMonth.textContent = y + "년 " + (m+1) + "월";
+
+    calGrid.innerHTML = "";
+    var dows = ["일","월","화","수","목","금","토"];
+    dows.forEach(function (d, i) {
+      var el = document.createElement("div");
+      el.className = "cal-dow" + (i===0?" sun":i===6?" sat":"");
+      el.textContent = d;
+      calGrid.appendChild(el);
+    });
+
+    var first = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m+1, 0).getDate();
+    for (var b = 0; b < first; b++) {
+      var emp = document.createElement("div");
+      emp.className = "cal-cell empty";
+      calGrid.appendChild(emp);
+    }
+    for (var day = 1; day <= daysInMonth; day++) {
+      var k = y + "-" + pad(m+1) + "-" + pad(day);
+      var cell = document.createElement("button");
+      cell.className = "cal-cell";
+      if (recDays[k]) cell.className += " has-rec";
+      if (k === todayKey()) cell.className += " today";
+      if (k === selectedDateKey) cell.className += " selected";
+      cell.textContent = day;
+      (function (kk) {
+        cell.onclick = function () {
+          selectedDateKey = (selectedDateKey === kk) ? null : kk;
+          renderCalendar(); renderHistory();
+        };
+      })(k);
+      calGrid.appendChild(cell);
+    }
+  }
+
+  document.getElementById("calPrev").onclick = function () { calView.setMonth(calView.getMonth()-1); renderCalendar(); };
+  document.getElementById("calNext").onclick = function () { calView.setMonth(calView.getMonth()+1); renderCalendar(); };
+
+  // ===== 히스토리 =====
+  function renderHistory() {
+    var arr = loadHistory();
+
+    // 선택 날짜 배너
+    bannerWrap.innerHTML = "";
+    var shown = arr;
+    if (selectedDateKey) {
+      shown = arr.filter(function (r) { return recKey(r) === selectedDateKey; });
+      var banner = document.createElement("div");
+      banner.className = "hist-banner";
+      banner.innerHTML = '<span class="lbl">📌 ' + dispFromKey(selectedDateKey) + '</span>' +
+                         '<button id="clearSel">전체 보기</button>';
+      bannerWrap.appendChild(banner);
+      document.getElementById("clearSel").onclick = function () {
+        selectedDateKey = null; renderCalendar(); renderHistory();
+      };
+    }
+
+    historyEl.innerHTML = "";
+    if (shown.length === 0) {
+      historyEl.innerHTML = selectedDateKey
+        ? '<div class="history-empty"><span class="big">🫧</span>이 날은 기록이 없어요</div>'
+        : '<div class="history-empty"><span class="big">🏊‍♀️</span>아직 기록이 없어요.<br>오늘 첫 연습을 기록해볼까요?</div>';
+      return;
+    }
+    shown.forEach(function (r) {
+      var item = document.createElement("div");
+      item.className = "hist-item";
+      var memoHtml = r.memo ? '<div class="hist-memo">📝 ' + escapeHtml(r.memo) + '</div>' : '';
+      item.innerHTML =
+        '<div class="hist-head">' +
+          '<span class="hist-date">' + r.date + '</span>' +
+          '<span class="hist-right">' +
+            '<span class="hist-stroke">' + r.strokeEmoji + ' ' + r.strokeName + '</span>' +
+            '<button class="hist-del" data-id="'+r.id+'" title="삭제">🗑</button>' +
+          '</span>' +
+        '</div>' +
+        '<div class="hist-stats">' +
+          '<span class="g">👍 잘 됨 ' + r.good + '</span> · ' +
+          '<span class="h">💧 어려움 ' + r.hard + '</span> · ' +
+          '<span style="color:var(--ink-soft)">전체 ' + r.total + '개</span>' +
+        '</div>' + memoHtml;
+      historyEl.appendChild(item);
+    });
+
+    historyEl.querySelectorAll(".hist-del").forEach(function (b) {
+      b.onclick = function () {
+        var id = Number(b.getAttribute("data-id"));
+        var list = loadHistory().filter(function (x) { return x.id !== id; });
+        saveHistory(list);
+        renderCalendar(); renderHistory();
+        showToast("기록을 삭제했어요");
+      };
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, function (c) {
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  (function makeBubbles() {
+    var wrap = document.getElementById("bubbles");
+    for (var i = 0; i < 14; i++) {
+      var b = document.createElement("div");
+      b.className = "bubble";
+      var size = 8 + Math.floor(Math.random() * 34);
+      b.style.width = size + "px"; b.style.height = size + "px";
+      b.style.left = Math.random() * 100 + "%";
+      b.style.animationDuration = (9 + Math.random() * 12) + "s";
+      b.style.animationDelay = (-Math.random() * 12) + "s";
+      wrap.appendChild(b);
+    }
+  })();
+
+  badgeEl.innerHTML = "📆 오늘 · " + dispDate(new Date());
+  renderTabs();
+  renderChecklist();
+  renderCalendar();
+  renderHistory();
+})();
+</script>
+</body>
+</html>
